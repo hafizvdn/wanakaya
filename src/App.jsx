@@ -18,7 +18,7 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/wanakaya/">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
