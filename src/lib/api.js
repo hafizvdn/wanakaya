@@ -34,6 +34,7 @@ export const transactionsApi = {
 }
 
 export const budgetsApi = {
+  // spent is now returned by the server inside each budget object
   getAll: () => api.get('/budgets'),
   create: body => api.post('/budgets', body),
   update: (id, body) => api.put(`/budgets/${id}`, body),
@@ -45,6 +46,8 @@ export const goalsApi = {
   create: body => api.post('/goals', body),
   update: (id, body) => api.put(`/goals/${id}`, body),
   remove: id => api.delete(`/goals/${id}`),
+  addContribution: (id, body) => api.post(`/goals/${id}/contributions`, body),
+  deleteContribution: (goalId, contributionId) => api.delete(`/goals/${goalId}/contributions/${contributionId}`),
 }
 
 export const accountsApi = {
@@ -59,4 +62,6 @@ export const billsApi = {
   create: body => api.post('/bills', body),
   update: (id, body) => api.put(`/bills/${id}`, body),
   remove: id => api.delete(`/bills/${id}`),
+  markPaid: id => api.patch(`/bills/${id}/paid`),
+  markUnpaid: id => api.patch(`/bills/${id}/unpaid`),
 }

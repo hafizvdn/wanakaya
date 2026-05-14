@@ -8,7 +8,6 @@ export default function GoalForm({ initial, onSubmit, onCancel }) {
   const [form, setForm] = useState({
     name: initial?.name ?? '',
     targetAmount: initial ? (initial.targetAmount / 100).toFixed(2) : '',
-    savedAmount: initial ? (initial.savedAmount / 100).toFixed(2) : '0.00',
     deadline: initial?.deadline ? format(new Date(initial.deadline), 'yyyy-MM-dd') : '',
   })
   const [error, setError] = useState(null)
@@ -28,7 +27,6 @@ export default function GoalForm({ initial, onSubmit, onCancel }) {
       await onSubmit({
         name: form.name.trim(),
         targetAmount: rmToSen(form.targetAmount),
-        savedAmount: rmToSen(form.savedAmount || '0'),
         deadline: form.deadline ? new Date(form.deadline).toISOString() : undefined,
       })
     } catch (err) {
@@ -57,26 +55,23 @@ export default function GoalForm({ initial, onSubmit, onCancel }) {
         onChange={e => set('targetAmount', e.target.value)}
       />
       <Input
-        label="Already saved (RM)"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="0.00"
-        value={form.savedAmount}
-        onChange={e => set('savedAmount', e.target.value)}
-      />
-      <Input
         label="Deadline (optional)"
         type="date"
         value={form.deadline}
         onChange={e => set('deadline', e.target.value)}
       />
 
+      {initial && (
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          To update saved amount, use the "Add funds" button on the goal card.
+        </p>
+      )}
+
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="flex gap-2 pt-1">
         <Button type="submit" disabled={saving} className="flex-1">
-          {saving ? 'Saving…' : initial ? 'Update' : 'Add'}
+          {saving ? 'Saving…' : initial ? 'Update' : 'Create goal'}
         </Button>
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>
       </div>

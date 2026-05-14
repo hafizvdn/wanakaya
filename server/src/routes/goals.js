@@ -1,22 +1,17 @@
 import { Router } from 'express'
-import { getGoals, createGoal, updateGoal, deleteGoal } from '../controllers/goalsController.js'
 import { requireAuth } from '../middleware/auth.js'
-import { validate } from '../middleware/validate.js'
-import { z } from 'zod'
+import { getGoals, createGoal, updateGoal, deleteGoal, addContribution, deleteContribution } from '../controllers/goalsController.js'
 
 const router = Router()
-
-const goalSchema = z.object({
-  name: z.string().min(1),
-  targetAmount: z.number().int().positive(),
-  savedAmount: z.number().int().min(0).optional(),
-  deadline: z.string().datetime().optional(),
-})
-
 router.use(requireAuth)
+
 router.get('/', getGoals)
-router.post('/', validate(goalSchema), createGoal)
-router.put('/:id', validate(goalSchema.partial()), updateGoal)
+router.post('/', createGoal)
+router.put('/:id', updateGoal)
 router.delete('/:id', deleteGoal)
+
+// Contribution sub-resource
+router.post('/:id/contributions', addContribution)
+router.delete('/:goalId/contributions/:contributionId', deleteContribution)
 
 export default router

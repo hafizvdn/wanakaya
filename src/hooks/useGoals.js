@@ -37,5 +37,19 @@ export function useGoals() {
     setGoals(prev => prev.filter(g => g.id !== id))
   }
 
-  return { goals, loading, error, createGoal, updateGoal, removeGoal, reload: load }
+  /** Add a deposit (positive amount) or withdrawal (negative amount) in sen */
+  async function addContribution(goalId, body) {
+    const updated = await goalsApi.addContribution(goalId, body)
+    setGoals(prev => prev.map(g => g.id === goalId ? updated : g))
+    return updated
+  }
+
+  /** Delete a contribution by id — server reverses the savedAmount */
+  async function removeContribution(goalId, contributionId) {
+    const updated = await goalsApi.deleteContribution(goalId, contributionId)
+    setGoals(prev => prev.map(g => g.id === goalId ? updated : g))
+    return updated
+  }
+
+  return { goals, loading, error, createGoal, updateGoal, removeGoal, addContribution, removeContribution, reload: load }
 }

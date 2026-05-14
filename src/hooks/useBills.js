@@ -37,5 +37,17 @@ export function useBills() {
     setBills(prev => prev.filter(b => b.id !== id))
   }
 
-  return { bills, loading, error, createBill, updateBill, removeBill, reload: load }
+  async function markPaid(id) {
+    const updated = await billsApi.markPaid(id)
+    setBills(prev => prev.map(b => b.id === id ? updated : b))
+    return updated
+  }
+
+  async function markUnpaid(id) {
+    const updated = await billsApi.markUnpaid(id)
+    setBills(prev => prev.map(b => b.id === id ? updated : b))
+    return updated
+  }
+
+  return { bills, loading, error, createBill, updateBill, removeBill, markPaid, markUnpaid, reload: load }
 }

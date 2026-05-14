@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Layout from '../components/ui/Layout.jsx'
 import Button from '../components/ui/Button.jsx'
 import Modal from '../components/ui/Modal.jsx'
@@ -6,35 +6,13 @@ import BudgetCard from '../components/budgets/BudgetCard.jsx'
 import BudgetForm from '../components/budgets/BudgetForm.jsx'
 import { useBudgets } from '../hooks/useBudgets.js'
 import { useCategories } from '../hooks/useCategories.js'
-import { useTransactions } from '../hooks/useTransactions.js'
 
 export default function Budgets() {
   const { budgets, loading, createBudget, updateBudget, removeBudget } = useBudgets()
   const { categories } = useCategories()
-  // Fetch ALL transactions so we can match each budget to its own month/year
-  const { transactions } = useTransactions({})
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
-
-  // Key: `${categoryId}-${month}-${year}` → total sen spent
-  const spentByBudgetKey = useMemo(() => {
-    const map = {}
-    for (const t of transactions) {
-      if (t.type !== 'EXPENSE') continue
-      const d = new Date(t.date)
-      const month = d.getMonth() + 1
-      const year = d.getFullYear()
-      const key = `${t.categoryId}-${month}-${year}`
-      map[key] = (map[key] ?? 0) + t.amount
-    }
-    return map
-  }, [transactions])
-
-  function spentForBudget(b) {
-    const key = `${b.categoryId}-${b.month}-${b.year}`
-    return spentByBudgetKey[key] ?? 0
-  }
 
   function openAdd() { setEditing(null); setModalOpen(true) }
   function openEdit(b) { setEditing(b); setModalOpen(true) }
@@ -66,7 +44,7 @@ export default function Budgets() {
                 <BudgetCard
                   key={b.id}
                   budget={b}
-                  spent={spentForBudget(b)}
+                  spent={b.spent}  // already computed by server
                   onEdit={openEdit}
                   onDelete={handleDelete}
                 />

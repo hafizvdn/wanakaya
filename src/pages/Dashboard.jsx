@@ -76,7 +76,7 @@ export default function Dashboard() {
         <Card className="col-span-2 lg:col-span-1 bg-gradient-to-br from-brand-600 to-brand-700 border-0">
           <p className="text-xs text-brand-100 uppercase tracking-wider mb-1">Total Balance</p>
           <p className="text-2xl font-bold text-white">{acLoading ? '…' : formatCurrency(totalBalance)}</p>
-          <p className="text-xs text-brand-200 mt-1">Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-brand-100 mt-1">Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
         </Card>
 
         <Card>

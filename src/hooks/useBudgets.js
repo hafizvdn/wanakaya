@@ -9,6 +9,7 @@ export function useBudgets() {
   async function load() {
     try {
       setLoading(true)
+      // Each budget now includes a `spent` field computed server-side
       const data = await budgetsApi.getAll()
       setBudgets(data)
     } catch (err) {

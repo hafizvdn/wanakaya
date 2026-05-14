@@ -10,6 +10,7 @@ datasource db {
 enum TransactionType {
   INCOME
   EXPENSE
+  TRANSFER
 }
 
 enum BudgetPeriod {
@@ -25,17 +26,18 @@ enum AccountType {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
-  password       String
-  name           String?
-  createdAt      DateTime        @default(now())
-  categories     Category[]
-  transactions   Transaction[]
-  budgets        Budget[]
-  savingsGoals   SavingsGoal[]
-  accounts       Account[]
-  recurringBills RecurringBill[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  password            String
+  name                String?
+  createdAt           DateTime             @default(now())
+  categories          Category[]
+  transactions        Transaction[]
+  budgets             Budget[]
+  savingsGoals        SavingsGoal[]
+  accounts            Account[]
+  recurringBills      RecurringBill[]
+  goalContributions   GoalContribution[]
 }
 
 model Category {
@@ -50,18 +52,20 @@ model Category {
 }
 
 model Transaction {
-  id         String          @id @default(cuid())
-  amount     Int
-  type       TransactionType
-  categoryId String
-  category   Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  accountId  String?
-  account    Account?        @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  note       String?
-  date       DateTime
-  userId     String
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt  DateTime        @default(now())
+  id              String          @id @default(cuid())
+  amount          Int
+  type            TransactionType
+  categoryId      String?
+  category        Category?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  accountId       String?
+  account         Account?        @relation(fields: [accountId], references: [id], onDelete: SetNull, name: "fromAccount")
+  toAccountId     String?
+  toAccount       Account?        @relation(fields: [toAccountId], references: [id], onDelete: SetNull, name: "toAccount")
+  note            String?
+  date            DateTime
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
 }
 
 model Budget {
@@ -77,35 +81,53 @@ model Budget {
 }
 
 model SavingsGoal {
-  id           String    @id @default(cuid())
-  name         String
-  targetAmount Int
-  savedAmount  Int       @default(0)
-  deadline     DateTime?
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime  @default(now())
+  id            String             @id @default(cuid())
+  name          String
+  targetAmount  Int
+  savedAmount   Int                @default(0)
+  deadline      DateTime?
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
+  createdAt     DateTime           @default(now())
+}
+
+/// Tracks each deposit/withdrawal against a savings goal.
+/// savedAmount on SavingsGoal is the running total kept in sync.
+model GoalContribution {
+  id        String      @id @default(cuid())
+  goalId    String
+  goal      SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  amount    Int         // positive = deposit, negative = withdrawal
+  note      String?
+  date      DateTime    @default(now())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
 }
 
 model Account {
-  id           String        @id @default(cuid())
-  name         String
-  type         AccountType
-  balance      Int
-  icon         String?
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
+  id                    String        @id @default(cuid())
+  name                  String
+  type                  AccountType
+  balance               Int
+  icon                  String?
+  userId                String
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions          Transaction[] @relation("fromAccount")
+  incomingTransfers     Transaction[] @relation("toAccount")
+  createdAt             DateTime      @default(now())
 }
 
 model RecurringBill {
-  id         String   @id @default(cuid())
-  name       String
-  amount     Int
-  dueDay     Int
-  icon       String?
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  name      String
+  amount    Int
+  dueDay    Int
+  icon      String?
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Set to the date the bill was marked paid; cleared each month by the user.
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
 }
